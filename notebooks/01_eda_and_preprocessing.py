@@ -82,7 +82,7 @@ if __name__ == "__main__":
     # Vérification de l'équilibre des classes
     for name, split in [("Train", df_train), ("Val", df_val), ("Test", df_test)]:
         dist = split["label"].value_counts(normalize=True).round(3)
-        print(f"  {name} → Positif: {dist.get(1, 0)*100:.1f}% | Négatif: {dist.get(0, 0)*100:.1f}%")
+        print(f"  {name} >> Positif: {dist.get(1, 0)*100:.1f}% | Negatif: {dist.get(0, 0)*100:.1f}%")
 
     # 5. Sauvegarde
     print_header("Sauvegarde des données prétraitées")
