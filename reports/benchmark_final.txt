@@ -1,0 +1,22 @@
+================================================================================
+  RAPPORT DE BENCHMARK FINAL – MINI-PROJET IA
+================================================================================
+
+Modèle                           Accuracy   F1 Macro    ROC-AUC    Train (s)  Inférence (ms)
+------------------------------------------------------------------------------------------
+Logistic Regression               100.00%    100.00%     1.0000       11.68s          0.082ms
+SVM (LinearSVC)                   100.00%    100.00%     1.0000        0.42s          0.147ms
+Random Forest                     100.00%    100.00%     1.0000        2.20s          0.836ms
+==========================================================================================
+
+ANALYSE DES RÉSULTATS :
+
+  Meilleure Accuracy     : Logistic Regression (100.00%)
+  Meilleur F1-Score      : Logistic Regression (100.00%)
+  Entraînement le plus rapide : SVM (LinearSVC) (0.42s)
+  Inférence la plus rapide    : Logistic Regression (0.082 ms/exemple)
+
+  Conclusion : Les modèles de ML classique offrent un excellent rapport
+  vitesse/performance pour des tâches standard, tandis que les Transformers
+  apportent une compréhension sémantique supérieure au coût d'une plus
+  grande empreinte calculatoire.
