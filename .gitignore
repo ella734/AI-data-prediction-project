@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+dist/
+build/
+*.egg-info/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Data - large binary files (use DVC or Azure Blob Storage)
+data/raw/*.csv
+data/raw/*.json
+data/raw/*.tsv
+data/raw/*.parquet
+data/processed/*.csv
+data/processed/*.pkl
+
+# Model files (too large for Git)
+models/
+*.pt
+*.pth
+*.safetensors
+*.bin
+
+# Hugging Face cache
+.cache/
+
+# Reports / generated figures
+reports/figures/*.png
+reports/figures/*.pdf
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment variables / secrets
+.env
+*.env
+
+# Azure DevOps
+.azuredevops/
+
+# Pytest cache
+.pytest_cache/
+.coverage
+htmlcov/

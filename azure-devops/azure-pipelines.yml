@@ -1,0 +1,154 @@
+# azure-devops/azure-pipelines.yml
+# ─────────────────────────────────────────────────────────────────────────────
+# Pipeline CI/CD Azure DevOps – Mini-Projet IA
+# Documentation : https://aka.ms/yaml
+# ─────────────────────────────────────────────────────────────────────────────
+
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+      - feature/*
+
+pr:
+  branches:
+    include:
+      - main
+      - develop
+
+pool:
+  vmImage: "ubuntu-latest"
+
+variables:
+  pythonVersion: "3.11"
+  pip_cache_dir: $(Pipeline.Workspace)/.pip
+
+stages:
+  # ──────────────────────────────────────────────────────────────────────────
+  # STAGE 1 : Intégration (CI)
+  # ──────────────────────────────────────────────────────────────────────────
+  - stage: CI
+    displayName: "Intégration Continue"
+    jobs:
+
+      - job: Lint_and_Test
+        displayName: "Lint + Tests Unitaires"
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: "$(pythonVersion)"
+              addToPath: true
+
+          - task: Cache@2
+            inputs:
+              key: 'pip | "$(Agent.OS)" | requirements.txt'
+              restoreKeys: 'pip | "$(Agent.OS)"'
+              path: $(pip_cache_dir)
+            displayName: "Cache dépendances pip"
+
+          - script: |
+              python -m pip install --upgrade pip
+              pip install -r requirements.txt
+              pip install flake8 pytest-cov
+            displayName: "Installation des dépendances"
+            env:
+              PIP_CACHE_DIR: $(pip_cache_dir)
+
+          - script: |
+              flake8 src/ tests/ notebooks/ \
+                --count \
+                --select=E9,F63,F7,F82 \
+                --show-source \
+                --statistics
+            displayName: "Linting (erreurs critiques)"
+            continueOnError: false
+
+          - script: |
+              python -m pytest tests/ \
+                -v \
+                --tb=short \
+                --junitxml=test-results.xml \
+                --cov=src \
+                --cov-report=xml:coverage.xml \
+                --cov-report=html:coverage-html \
+                --cov-fail-under=70
+            displayName: "Tests unitaires (pytest)"
+
+          - task: PublishTestResults@2
+            condition: succeededOrFailed()
+            inputs:
+              testResultsFormat: "JUnit"
+              testResultsFiles: "test-results.xml"
+              testRunTitle: "Tests Unitaires – Mini-Projet IA"
+
+          - task: PublishCodeCoverageResults@1
+            inputs:
+              codeCoverageTool: Cobertura
+              summaryFileLocation: coverage.xml
+              reportDirectory: coverage-html
+            displayName: "Rapport de couverture de code"
+
+      - job: Smoke_Test
+        displayName: "Smoke Tests Pipeline"
+        dependsOn: Lint_and_Test
+        condition: succeeded()
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: "$(pythonVersion)"
+
+          - script: |
+              pip install -r requirements.txt
+            displayName: "Installation des dépendances"
+
+          - script: |
+              python notebooks/01_eda_and_preprocessing.py
+            displayName: "Smoke Test – EDA & Prétraitement"
+
+          - script: |
+              python notebooks/02_ml_baseline_models.py
+            displayName: "Smoke Test – Modèles ML classiques"
+
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: "reports/figures"
+              artifact: "visualisations"
+              publishLocation: "pipeline"
+            displayName: "Publier les graphiques générés"
+            condition: succeededOrFailed()
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # STAGE 2 : Entraînement complet (optionnel – sur main uniquement)
+  # ──────────────────────────────────────────────────────────────────────────
+  - stage: Training
+    displayName: "Entraînement Complet (main uniquement)"
+    dependsOn: CI
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+
+      - job: Train_Transformers
+        displayName: "Fine-tuning DistilBERT + Benchmark"
+        timeoutInMinutes: 60
+        steps:
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: "$(pythonVersion)"
+
+          - script: |
+              pip install -r requirements.txt
+            displayName: "Installation des dépendances"
+
+          - script: |
+              python notebooks/01_eda_and_preprocessing.py
+              python notebooks/02_ml_baseline_models.py
+              python notebooks/03_transformers_training.py
+              python notebooks/04_model_comparison.py
+            displayName: "Pipeline complet – EDA → ML → Transformer → Benchmark"
+
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: "reports"
+              artifact: "rapport-benchmark"
+              publishLocation: "pipeline"
+            displayName: "Publier le rapport de benchmark complet"

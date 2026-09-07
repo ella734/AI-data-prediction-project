@@ -1,0 +1,76 @@
+# .github/workflows/python-ci.yml
+# ─────────────────────────────────────────────────────────────────────────────
+# Pipeline d'Intégration Continue (CI) GitHub Actions
+# Déclenché sur chaque Push et Pull Request vers main/develop
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: CI – Mini-Projet IA
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  test:
+    name: Tests & Validation
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      # 1. Récupération du code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Configuration de Python
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+
+      # 3. Installation des dépendances
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # 4. Vérification du code (linting)
+      - name: Lint with flake8
+        run: |
+          pip install flake8
+          # Erreurs critiques (syntaxe, imports non définis)
+          flake8 src/ tests/ notebooks/ --count --select=E9,F63,F7,F82 --show-source --statistics
+          # Avertissements de style (avec tolérance longueur de ligne)
+          flake8 src/ tests/ notebooks/ --count --exit-zero --max-complexity=12 --max-line-length=100 --statistics
+
+      # 5. Exécution des tests unitaires avec couverture de code
+      - name: Run tests with pytest
+        run: |
+          pip install pytest-cov
+          python -m pytest tests/ \
+            -v \
+            --tb=short \
+            --cov=src \
+            --cov-report=term-missing \
+            --cov-report=xml:coverage.xml \
+            --cov-fail-under=70
+
+      # 6. Upload du rapport de couverture (optionnel – nécessite codecov.io)
+      # - name: Upload coverage to Codecov
+      #   uses: codecov/codecov-action@v4
+      #   with:
+      #     file: coverage.xml
+
+      # 7. Vérification que le pipeline de données s'exécute correctement
+      - name: Smoke test – Pipeline de prétraitement
+        run: |
+          python notebooks/01_eda_and_preprocessing.py
+
+      # 8. Smoke test des modèles ML (entraînement rapide)
+      - name: Smoke test – Modèles ML classiques
+        run: |
+          python notebooks/02_ml_baseline_models.py
