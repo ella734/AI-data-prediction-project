@@ -7,6 +7,7 @@ Modèle                           Accuracy   F1 Macro    ROC-AUC    Train (s)  I
 Logistic Regression               100.00%    100.00%     1.0000       11.68s          0.082ms
 SVM (LinearSVC)                   100.00%    100.00%     1.0000        0.42s          0.147ms
 Random Forest                     100.00%    100.00%     1.0000        2.20s          0.836ms
+DistilBERT (fine-tuné)            100.00%    100.00%     1.0000      385.74s         45.408ms
 ==========================================================================================
 
 ANALYSE DES RÉSULTATS :
