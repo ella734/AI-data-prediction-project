@@ -15,6 +15,7 @@ build/
 .ipynb_checkpoints/
 
 # Data - large binary files (use DVC or Azure Blob Storage)
+data/raw/
 data/raw/*.csv
 data/raw/*.json
 data/raw/*.tsv

@@ -117,7 +117,9 @@ python -m pytest tests/ -v --tb=short
 
 ## Jeu de données
 
-Le projet utilise un **jeu de données de classification de sentiment** synthétique mais représentatif (1 000 avis). En production, remplacez-le par :
+Le pipeline utilise le jeu de données réel **IMDb Large Movie Reviews Dataset** (25 000 avis d'entraînement et 25 000 avis de test, équilibrés entre sentiments positif et négatif). L'archive officielle est téléchargée automatiquement depuis Stanford lors de l'exécution de l'étape 1. Elle est extraite localement dans `data/raw/` et n'est pas versionnée par Git.
+
+Pour une autre langue ou un autre domaine, remplacez-le par :
 - **IMDb Large Movie Reviews Dataset** (50K exemples, Stanford)
 - **Amazon Customer Reviews** (Multi-domaines)
 - **CamemBERT Corpus** (textes français)
@@ -138,6 +140,8 @@ Le projet utilise un **jeu de données de classification de sentiment** synthét
 ## Résultats et comparaison
 
 Les résultats complets sont générés dans `reports/figures/` après exécution de `04_model_comparison.py`.
+
+Les scores obtenus sur IMDb doivent être utilisés pour l'évaluation finale. Les scores des anciens artefacts générés avec le jeu synthétique ne sont pas représentatifs d'un corpus réel.
 
 Exemple de tableau de benchmark typique :
 
